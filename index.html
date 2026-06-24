@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>동기화 메모장 V2</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0067ff">
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Noto Sans KR",sans-serif;background:#f7f9fc;color:#111}.topbar{height:56px;background:linear-gradient(135deg,#0075ff,#0054df);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font-size:20px;font-weight:900;position:sticky;top:0;z-index:10;box-shadow:0 2px 10px #0002}.icon{font-size:26px;cursor:pointer}.sync{font-size:12px;font-weight:800;background:#fff3;padding:5px 8px;border-radius:99px}.wrap{padding:16px 14px 88px}.section-head{display:flex;justify-content:space-between;align-items:center;margin:8px 2px 12px;font-size:18px;font-weight:900}.small-link{font-size:13px;color:#0067ff;font-weight:800;cursor:pointer}.recent-row{display:flex;gap:10px;overflow-x:auto;padding-bottom:12px;margin-bottom:12px}.recent-card{flex:0 0 132px;height:72px;background:#fff;border:1.5px dashed #2582ff;border-radius:9px;padding:9px;display:flex;flex-direction:column;justify-content:center;text-align:center;color:#005be8;font-weight:900;font-size:13px;box-shadow:0 2px 8px #0001}.search-box{width:100%;height:42px;border:1px solid #d9e4f5;border-radius:10px;padding:0 12px;margin-bottom:14px;font-size:15px;outline:none;background:#fff}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px 10px}.memo-card{min-height:58px;background:#fff;border:1.5px solid #8fc0ff;border-radius:8px;display:flex;align-items:center;padding:8px 9px;gap:8px;font-size:13px;box-shadow:0 2px 8px #00000009;cursor:pointer;user-select:none}.num{color:#0067ff;font-weight:900;min-width:18px;font-size:16px}.title{color:#333;font-weight:800;line-height:1.25;word-break:keep-all;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}.empty-title{color:#777;font-weight:600}.hint{position:fixed;bottom:12px;left:14px;right:14px;background:#fffffff5;border-radius:12px;padding:12px;display:flex;justify-content:space-between;align-items:center;color:#777;font-size:13px;box-shadow:0 4px 18px #0002}.hint .del{color:#ff2c2c;font-weight:900}.edit-screen{display:none;min-height:100vh;background:#f7f9fc}.edit-wrap{padding:14px}#titleInput{width:100%;height:42px;border:1px solid #d9e4f5;border-radius:10px;padding:0 12px;font-size:16px;font-weight:900;outline:none;margin-bottom:12px}#memoText{width:100%;height:calc(100vh - 210px);min-height:420px;border:1px solid #d9e4f5;border-radius:12px;padding:14px;resize:none;font-size:16px;line-height:1.55;outline:none;background:#fff}.counter{text-align:right;color:#777;font-size:13px;margin:6px 4px 12px}.buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px}button{height:48px;border:0;border-radius:10px;font-size:16px;font-weight:900;cursor:pointer}.copy{background:#eef6ff;color:#0067ff;border:1px solid #a9ceff}.save{background:#0067ff;color:#fff}.delete{margin-top:10px;width:100%;background:#fff0f0;color:#ff2c2c;border:1px solid #ffb0b0}.toast{position:fixed;bottom:86px;left:50%;transform:translateX(-50%);background:#000d;color:#fff;padding:10px 16px;border-radius:20px;font-weight:900;display:none;z-index:50;white-space:nowrap}.modal-bg{position:fixed;inset:0;background:#0007;display:none;align-items:center;justify-content:center;z-index:40;padding:24px}.modal{width:100%;max-width:330px;background:#fff;border-radius:18px;padding:24px 20px 18px;text-align:center;box-shadow:0 10px 35px #0004}.modal .trash{font-size:42px;color:#ff2c2c}.modal h3{margin:8px 0 6px;font-size:20px}.modal p{margin:0 0 18px;color:#777;font-size:14px}.modal-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px}.cancel{background:#f1f1f1;color:#333}.confirm{background:#ff2c2c;color:#fff}.setup{background:#fff7dc;border:1px solid #f1c85b;color:#5d4500;border-radius:12px;padding:12px;font-size:13px;line-height:1.45;margin-bottom:12px;display:none}@media(max-width:390px){.grid{gap:9px 7px}.memo-card{padding:7px;font-size:12px;min-height:56px}.num{font-size:15px;min-width:16px}}
+</style>
+</head>
+<body>
+<div id="mainScreen">
+ <div class="topbar"><div class="icon">☰</div><div>동기화 메모장</div><div class="sync" id="syncStatus">연결확인</div></div>
+ <div class="wrap">
+  <div class="setup" id="setupBox">Google Apps Script 주소가 아직 설정되지 않았습니다.<br>index.html의 <b>SCRIPT_URL</b> https://script.google.com/macros/s/AKfycbw_OD85yqzhsAkwtQlZLoGZKR9_UZhUbsnAfdBgnyvI5elADEht7IlkBP0WgB7hd-zw/exec.</div>
+  <div class="section-head"><span>☆ 최근 사용</span><span class="small-link" onclick="syncLoad()">새로고침</span></div>
+  <div class="recent-row" id="recentRow"></div>
+  <input id="searchInput" class="search-box" placeholder="제목 검색" oninput="renderGrid()">
+  <div class="section-head"><span>▣ 전체 메모 30개</span><span class="small-link">자동동기화</span></div>
+  <div class="grid" id="memoGrid"></div>
+ </div>
+ <div class="hint"><span>수정하면 자동 저장됩니다.</span><span class="del">길게 누르면 삭제 🗑</span></div>
+</div>
+<div id="editScreen" class="edit-screen">
+ <div class="topbar"><div class="icon" onclick="goBack()">‹</div><div id="editHeader">메모 편집</div><div class="sync" id="syncStatus2">동기화</div></div>
+ <div class="edit-wrap">
+  <input id="titleInput" maxlength="60" placeholder="제목을 입력하세요">
+  <textarea id="memoText" maxlength="10000" placeholder="내용을 입력하세요. 최대 10,000자까지 저장됩니다."></textarea>
+  <div class="counter"><span id="charCount">0</span> / 10,000자</div>
+  <div class="buttons"><button class="copy" onclick="copyMemo()">복사하기</button><button class="save" onclick="saveNow()">즉시동기화</button></div>
+  <button class="delete" onclick="askDelete()">삭제하기</button>
+ </div>
+</div>
+<div class="modal-bg" id="modalBg"><div class="modal"><div class="trash">🗑</div><h3>메모를 삭제하시겠습니까?</h3><p>삭제하면 Google Sheet에서도 비워집니다.</p><div class="modal-buttons"><button class="cancel" onclick="closeModal()">취소</button><button class="confirm" onclick="deleteMemo()">삭제</button></div></div></div>
+<div id="toast" class="toast"></div>
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw_OD85yqzhsAkwtQlZLoGZKR9_UZhUbsnAfdBgnyvI5elADEht7IlkBP0WgB7hd-zw/exec";
+const STORAGE_KEY="syncMemo30_v2_cache",RECENT_KEY="syncMemo30_recent_v2";
+let memos=[],recent=[],currentIndex=null,pressTimer=null,saveTimer=null;
+function init(){const s=localStorage.getItem(STORAGE_KEY);memos=s?JSON.parse(s):Array.from({length:30},(_,i)=>({no:i+1,title:"",body:"",updatedAt:""}));const r=localStorage.getItem(RECENT_KEY);recent=r?JSON.parse(r):[];memoText.addEventListener("input",()=>{updateCount();autoSave()});titleInput.addEventListener("input",autoSave);renderRecent();renderGrid();if(!isConfigured()){setupBox.style.display="block";setStatus("주소필요")}else syncLoad()}
+function isConfigured(){return SCRIPT_URL&&!SCRIPT_URL.includes("PASTE_GOOGLE_APPS_SCRIPT")}
+function setStatus(t){syncStatus.textContent=t;syncStatus2.textContent=t}
+function cache(){localStorage.setItem(STORAGE_KEY,JSON.stringify(memos));localStorage.setItem(RECENT_KEY,JSON.stringify(recent))}
+async function api(action,payload={}){if(!isConfigured())throw new Error("SCRIPT_URL 미설정");const res=await fetch(SCRIPT_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action,...payload})});return await res.json()}
+async function syncLoad(){if(!isConfigured())return;try{setStatus("불러오는중");const data=await api("list");if(data.ok&&Array.isArray(data.memos)){memos=data.memos.map((m,i)=>({no:m.no||i+1,title:m.title||"",body:m.body||"",updatedAt:m.updatedAt||""}));while(memos.length<30)memos.push({no:memos.length+1,title:"",body:"",updatedAt:""});memos=memos.slice(0,30);cache();renderRecent();renderGrid();setStatus("동기화완료")}else setStatus("오류")}catch(e){setStatus("오프라인");showToast("연동 실패: 폰 저장본 사용")}}
+function renderRecent(){recentRow.innerHTML="";const list=recent.slice(0,5);for(let i=0;i<5;i++){const idx=list[i],d=document.createElement("div");d.className="recent-card";if(idx!==undefined&&memos[idx]){d.innerHTML=`<div>${idx+1}</div><div>${memos[idx].title||"제목을 입력하세요"}</div>`;d.onclick=()=>openMemo(idx)}else d.innerHTML=`<div>${i+1}</div><div>제목을 입력하세요</div>`;recentRow.appendChild(d)}}
+function renderGrid(){const q=searchInput.value.trim().toLowerCase();memoGrid.innerHTML="";memos.forEach((memo,idx)=>{const title=memo.title||"제목을 입력하세요";if(q&&!title.toLowerCase().includes(q))return;const c=document.createElement("div");c.className="memo-card";c.innerHTML=`<span class="num">${idx+1}</span><span class="title ${memo.title?"":"empty-title"}">${title}</span>`;c.onclick=()=>openMemo(idx);c.onmousedown=c.ontouchstart=()=>{pressTimer=setTimeout(()=>{currentIndex=idx;askDelete()},700)};c.onmouseup=c.onmouseleave=c.ontouchend=()=>clearTimeout(pressTimer);memoGrid.appendChild(c)})}
+function openMemo(idx){currentIndex=idx;recent=[idx,...recent.filter(x=>x!==idx)].slice(0,5);titleInput.value=memos[idx].title;memoText.value=memos[idx].body;editHeader.textContent=memos[idx].title||"메모 편집";updateCount();cache();mainScreen.style.display="none";editScreen.style.display="block"}
+function goBack(){saveLocalFromEditor();editScreen.style.display="none";mainScreen.style.display="block";renderRecent();renderGrid()}
+function saveLocalFromEditor(){if(currentIndex===null)return;memos[currentIndex].title=titleInput.value.trim();memos[currentIndex].body=memoText.value;memos[currentIndex].updatedAt=new Date().toISOString();editHeader.textContent=memos[currentIndex].title||"메모 편집";cache()}
+function autoSave(){saveLocalFromEditor();setStatus("저장대기");clearTimeout(saveTimer);saveTimer=setTimeout(saveNow,800)}
+async function saveNow(){if(currentIndex===null)return;saveLocalFromEditor();if(!isConfigured()){showToast("SCRIPT_URL 설정 필요");return}try{setStatus("저장중");const m=memos[currentIndex];const d=await api("save",{no:currentIndex+1,title:m.title,body:m.body});if(d.ok){memos[currentIndex].updatedAt=d.updatedAt||new Date().toISOString();cache();setStatus("동기화완료")}else{setStatus("오류");showToast("저장 실패")}}catch(e){setStatus("오프라인");showToast("연동 실패: 폰에는 저장됨")}}
+async function copyMemo(){saveLocalFromEditor();const text=memoText.value;try{await navigator.clipboard.writeText(text);showToast("클립보드 복사 완료");setTimeout(goBack,700)}catch(e){memoText.select();document.execCommand("copy");showToast("복사 완료");setTimeout(goBack,700)}}
+function askDelete(){if(currentIndex===null)return;modalBg.style.display="flex"}function closeModal(){modalBg.style.display="none"}
+async function deleteMemo(){if(currentIndex!==null){const idx=currentIndex;memos[idx]={no:idx+1,title:"",body:"",updatedAt:new Date().toISOString()};recent=recent.filter(x=>x!==idx);cache();if(isConfigured()){try{setStatus("삭제중");await api("delete",{no:idx+1});setStatus("동기화완료")}catch(e){setStatus("오프라인")}}}closeModal();showToast("삭제 완료");editScreen.style.display="none";mainScreen.style.display="block";renderRecent();renderGrid()}
+function updateCount(){charCount.textContent=memoText.value.length.toLocaleString()}
+function showToast(msg){toast.textContent=msg;toast.style.display="block";setTimeout(()=>toast.style.display="none",1400)}
+if("serviceWorker"in navigator){navigator.serviceWorker.register("service-worker.js").catch(()=>{})}init();
+</script>
+</body></html>
